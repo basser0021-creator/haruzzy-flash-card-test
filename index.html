@@ -21,8 +21,10 @@ button{font-family:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-
 .modeTabs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:16px auto}
 .modeBtn{border:1px solid rgba(255,210,26,.5);border-radius:16px;background:rgba(255,255,255,.08);color:#fff;padding:14px 18px;font-size:18px;font-weight:1000}
 .modeBtn.active{background:#ffd21a;color:#061326}
-.sectionGrid{display:grid;grid-template-columns:repeat(2,minmax(130px,1fr));gap:10px;width:min(780px,96vw);max-height:55vh;overflow-y:auto;overflow-x:hidden;margin:12px auto;padding:4px;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+.sectionGrid{display:grid;grid-template-columns:repeat(2,minmax(130px,1fr));gap:10px;width:min(780px,96vw);max-height:45vh;overflow:auto;margin:12px auto;padding:4px}
 .secBtn{border:1px solid rgba(255,210,26,.35);border-radius:12px;background:rgba(255,255,255,.09);color:#fff;padding:12px 6px;font-size:15px;font-weight:850}
+.secBtn.quickGroupA{background:rgba(255,255,255,.09)}
+.secBtn.quickGroupB{background:rgba(67,103,142,.28);border-color:rgba(132,169,207,.48)}
 .secBtn.selected{background:#ffd21a;color:#061326;border-color:#ffd21a}
 .secBtn.done{background:#FFD21A;color:#061326;border-color:#FFD21A}
 .secBtn.master{background:#FFD21A;color:#061326;border-color:#FFD21A;box-shadow:0 0 16px rgba(255,210,26,.55)}
@@ -66,7 +68,7 @@ button{font-family:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-
 .score{text-align:center;font-size:52px;font-weight:1000;margin:10px}
 .miss{padding:9px 0;border-bottom:1px solid rgba(255,255,255,.14)}
 </style>
-<!-- HARUZZY_VER_5_1_SCROLL_FIX_PLUS -->
+<!-- HARUZZY_VER_5_3_SCROLL_POSITION_FIX -->
 </head>
 <body>
 <div id="root" class="app">読み込み中...</div>
@@ -82,6 +84,7 @@ const CLOUD_ENABLED=location.hostname==="basser0021-creator.github.io";
 let cloudStats={};
 let cloudLoaded=false;
 let cloudMessage=CLOUD_ENABLED?"☁️ 同期中...":"☁️ 公開版で3台共有";
+let menuScrollTop=0;
 
 
 function pad(n){return String(n).padStart(4,"0")}
@@ -220,7 +223,12 @@ function menu(){
   for(let s=1;s<=1700;s+=step){
     let e=Math.min(s+step-1,1700);
     let st=getStats(selectedMode+"_"+pad(s)+"_"+pad(e));
-    let cls=(s===selectedStart?"secBtn selected":"secBtn")+statusClass(st);
+    let quickGroup="";
+    if(selectedMode==="quick"){
+      const groupIndex=Math.floor((s-1)/100);
+      quickGroup=groupIndex%2===0?" quickGroupA":" quickGroupB";
+    }
+    let cls=(s===selectedStart?"secBtn selected":"secBtn")+quickGroup+statusClass(st);
     buttons += `<button class="${cls}" data-action="vol" data-s="${s}" data-e="${e}">vol.${pad(s)}-${pad(e)}${statusLabel(st)}</button>`;
   }
   root.className="app";
@@ -238,9 +246,29 @@ function menu(){
     <button class="resetBtn" data-action="reset">RESET DATA</button>
     <div class="small">選択中：${volName()} / 毎回ランダム出題</div>
   </div>`;
+
+  const grid=root.querySelector(".sectionGrid");
+  if(grid){
+    grid.scrollTop=menuScrollTop;
+    grid.addEventListener("scroll",function(){
+      menuScrollTop=grid.scrollTop;
+    },{passive:true});
+  }
 }
-function changeMode(m){selectedMode=m;selectedStart=1;selectedEnd=m==="standard"?100:20;menu()}
-function selectVol(s,e){selectedStart=s;selectedEnd=e;menu()}
+function changeMode(m){
+  selectedMode=m;
+  selectedStart=1;
+  selectedEnd=m==="standard"?100:20;
+  menuScrollTop=0;
+  menu();
+}
+function selectVol(s,e){
+  const grid=root.querySelector(".sectionGrid");
+  if(grid)menuScrollTop=grid.scrollTop;
+  selectedStart=s;
+  selectedEnd=e;
+  menu();
+}
 function startGame(){isTryAgain=false;cards=shuffle(allCards.filter(c=>c.no>=selectedStart&&c.no<=selectedEnd));index=0;correct=0;wrong=[];breakShown={30:false,60:false,90:false};showQuestion()}
 function startTryAgain(){isTryAgain=true;cards=shuffle([...missedSource]);index=0;correct=0;wrong=[];breakShown={30:true,60:true,90:true};showQuestion()}
 function topbar(){return `<div class="topbar"><div class="vol">${isTryAgain?"TRY AGAIN":volName()}</div><div class="count">${Math.min(index+1,cards.length)} / ${cards.length}</div></div>`}
@@ -387,8 +415,47 @@ function handleAction(e){
   else if(a==="menu")menu();
   else if(a==="reset")resetData();
 }
-document.addEventListener("click",handleAction,true);
-document.addEventListener("touchend",handleAction,{passive:false,capture:true});
+let touchStartX=0;
+let touchStartY=0;
+let touchDidMove=false;
+let suppressClickUntil=0;
+
+document.addEventListener("touchstart",function(e){
+  const t=e.touches&&e.touches[0];
+  if(!t)return;
+  touchStartX=t.clientX;
+  touchStartY=t.clientY;
+  touchDidMove=false;
+},{passive:true,capture:true});
+
+document.addEventListener("touchmove",function(e){
+  const t=e.touches&&e.touches[0];
+  if(!t)return;
+  if(Math.abs(t.clientX-touchStartX)>8||Math.abs(t.clientY-touchStartY)>8){
+    touchDidMove=true;
+  }
+},{passive:true,capture:true});
+
+document.addEventListener("touchend",function(e){
+  if(touchDidMove){
+    suppressClickUntil=Date.now()+500;
+    return;
+  }
+  const btn=e.target.closest&&e.target.closest("button[data-action]");
+  if(!btn)return;
+  suppressClickUntil=Date.now()+500;
+  handleAction(e);
+},{passive:false,capture:true});
+
+document.addEventListener("click",function(e){
+  if(Date.now()<suppressClickUntil){
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
+  handleAction(e);
+},true);
+
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&cards.length)showAnswer();});
 menu();
 loadCloudStats();
