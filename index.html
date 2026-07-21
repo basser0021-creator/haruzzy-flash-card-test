@@ -26,12 +26,17 @@ button{font-family:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-
 .secBtn{border:1px solid rgba(255,210,26,.35);border-radius:12px;background:rgba(255,255,255,.09);color:#fff;padding:12px 6px;font-size:15px;font-weight:850}
 .secBtn.quickGroupA{background:rgba(255,255,255,.09);border-left:6px solid #94a3b8}
 .secBtn.quickGroupB{background:rgba(90,135,185,.40);border-color:rgba(170,205,240,.60);border-left:6px solid #58a6ff}
-.secBtn.done{background:#f28c28;color:#061326;border-color:#ffb45f}
-.secBtn.master{background:#ed7d1a;color:#061326;border-color:#ffc06f;box-shadow:0 0 16px rgba(242,140,40,.55)}
-.secBtn.grand{background:#df6f12;color:#061326;border-color:#ffd09a;box-shadow:0 0 22px rgba(242,140,40,.75), inset 0 0 0 2px #fff}
-.secBtn.quickGroupA.done,.secBtn.quickGroupA.master,.secBtn.quickGroupA.grand{border-left:6px solid #fff1dc}
-.secBtn.quickGroupB.done,.secBtn.quickGroupB.master,.secBtn.quickGroupB.grand{background:#d96f20;border-left:6px solid #58a6ff}
+.secBtn.done{background:#64748b;color:#fff;border-color:#94a3b8}
+.secBtn.master{background:#53657c;color:#fff;border-color:#b8c5d6;box-shadow:0 0 14px rgba(148,163,184,.42)}
+.secBtn.grand{background:#42536a;color:#fff;border-color:#e2e8f0;box-shadow:0 0 20px rgba(203,213,225,.55),inset 0 0 0 2px #fff}
+.secBtn.quickGroupA.done,.secBtn.quickGroupA.master,.secBtn.quickGroupA.grand{border-left:6px solid #cbd5e1}
+.secBtn.quickGroupB.done,.secBtn.quickGroupB.master,.secBtn.quickGroupB.grand{background:#566b84;border-left:6px solid #58a6ff}
 .secBtn.selected,.secBtn.selected.done,.secBtn.selected.master,.secBtn.selected.grand{background:#ffd21a;color:#061326;border-color:#fff2a8;box-shadow:0 0 0 3px #fff,0 0 18px rgba(255,210,26,.8)}
+.quickBlock{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(120px,1fr));gap:8px;border-radius:16px;padding:9px;border:1px solid rgba(255,255,255,.18)}
+.quickBlockA{background:rgba(255,255,255,.035)}
+.quickBlockB{background:rgba(88,166,255,.12);border-color:rgba(88,166,255,.42)}
+.quickBlockTitle{grid-column:1/-1;text-align:left;padding:0 4px 2px;font-size:12px;font-weight:1000;letter-spacing:.06em;color:#cbd5e1}
+.quickBlockB .quickBlockTitle{color:#93c5fd}
 .progressBox{margin:12px auto 0;color:#dbe4ef;font-size:15px;font-weight:900}
 .resetBtn{border:1px solid rgba(255,255,255,.25);background:#1f2937;color:#fff;border-radius:14px;padding:10px 14px;font-size:13px;font-weight:900;margin-top:8px}
 .win{min-height:100vh;width:100vw;display:flex;align-items:center;justify-content:center;text-align:center;padding:16px;background:radial-gradient(circle at center,#1d2b45 0%,#061326 55%,#020814 100%);overflow:hidden;position:relative}
@@ -71,7 +76,10 @@ button{font-family:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-
 .opening{min-height:100vh;width:100vw;display:flex;align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle at center,#17345a 0%,#061326 58%,#020814 100%)}
 .openingTitle{font-size:clamp(50px,13vw,112px);font-weight:1000;line-height:.95;color:#ffd21a;text-shadow:0 4px 0 rgba(0,0,0,.3)}
 .openingSub{margin-top:22px;font-size:clamp(20px,5vw,34px);font-weight:1000;letter-spacing:.16em;color:#fff;animation:switchGlow .75s ease-in-out infinite alternate}
+.pushStart{border:0;border-radius:22px;background:#ffd21a;color:#061326;padding:20px 46px;font-size:clamp(30px,8vw,58px);font-weight:1000;letter-spacing:.08em;box-shadow:0 12px 30px rgba(0,0,0,.45);animation:switchRise .9s cubic-bezier(.2,.8,.2,1) both,pushBlink .8s steps(2,end) .9s infinite}
 @keyframes switchGlow{from{opacity:.55}to{opacity:1;text-shadow:0 0 18px #58a6ff}}
+@keyframes pushBlink{50%{opacity:.58}}
+@keyframes switchRise{from{opacity:0;transform:translateY(70px) scale(.88)}to{opacity:1;transform:translateY(0) scale(1)}}
 .score{text-align:center;font-size:52px;font-weight:1000;margin:10px}
 .miss{padding:9px 0;border-bottom:1px solid rgba(255,255,255,.14)}
 </style>
@@ -94,6 +102,7 @@ let cloudStats={};
 let cloudLoaded=false;
 let cloudMessage=CLOUD_ENABLED?"☁️ 同期中...":"☁️ 公開版で3台共有";
 let menuScrollTop=0;
+let hasEntered=false;
 
 
 function pad(n){return String(n).padStart(4,"0")}
@@ -138,7 +147,7 @@ function jsonpRequest(params,callback){
 function loadCloudStats(){
   if(!CLOUD_ENABLED)return;
   cloudMessage="☁️ 同期中...";
-  menu();
+  if(hasEntered)menu();
   jsonpRequest({action:"load"},function(res){
     if(res&&res.ok&&res.data){
       cloudStats=res.data;
@@ -149,7 +158,7 @@ function loadCloudStats(){
       cloudLoaded=false;
       cloudMessage="☁️ 3台共有：未接続";
     }
-    menu();
+    if(hasEntered)menu();
   });
 }
 function saveCloudStat(mode,start,end,st){
@@ -229,16 +238,28 @@ function playBreak(long){tone(660,"sine",.18,.13);tone(990,"sine",.20,.11,.15);i
 function menu(){
   const step=selectedMode==="standard"?100:20;
   let buttons="";
-  for(let s=1;s<=1700;s+=step){
-    let e=Math.min(s+step-1,1700);
-    let st=getStats(selectedMode+"_"+pad(s)+"_"+pad(e));
-    let quickGroup="";
-    if(selectedMode==="quick"){
-      const groupIndex=Math.floor((s-1)/100);
-      quickGroup=groupIndex%2===0?" quickGroupA":" quickGroupB";
+  if(selectedMode==="quick"){
+    let groupNo=0;
+    for(let groupStart=1;groupStart<=1700;groupStart+=100){
+      const groupEnd=Math.min(groupStart+99,1700);
+      let groupButtons="";
+      for(let s=groupStart;s<=groupEnd;s+=20){
+        const e=Math.min(s+19,1700);
+        const st=getStats("quick_"+pad(s)+"_"+pad(e));
+        const cls=(s===selectedStart?"secBtn selected":"secBtn")+statusClass(st);
+        groupButtons+=`<button class="${cls}" data-action="vol" data-s="${s}" data-e="${e}">vol.${pad(s)}-${pad(e)}${statusLabel(st)}</button>`;
+      }
+      const blockClass=groupNo%2===0?"quickBlock quickBlockA":"quickBlock quickBlockB";
+      buttons+=`<div class="${blockClass}"><div class="quickBlockTitle">GROUP ${String(groupNo+1).padStart(2,"0")}　vol.${pad(groupStart)}-${pad(groupEnd)}</div>${groupButtons}</div>`;
+      groupNo++;
     }
-    let cls=(s===selectedStart?"secBtn selected":"secBtn")+quickGroup+statusClass(st);
-    buttons += `<button class="${cls}" data-action="vol" data-s="${s}" data-e="${e}">vol.${pad(s)}-${pad(e)}${statusLabel(st)}</button>`;
+  }else{
+    for(let s=1;s<=1700;s+=step){
+      const e=Math.min(s+step-1,1700);
+      const st=getStats("standard_"+pad(s)+"_"+pad(e));
+      const cls=(s===selectedStart?"secBtn selected":"secBtn")+statusClass(st);
+      buttons+=`<button class="${cls}" data-action="vol" data-s="${s}" data-e="${e}">vol.${pad(s)}-${pad(e)}${statusLabel(st)}</button>`;
+    }
   }
   root.className="app";
   root.innerHTML=`<div>
@@ -279,13 +300,12 @@ function selectVol(s,e){
   menu();
 }
 let openingInProgress=false;
-function startGame(withOpening=false){
+function showSplash(){
+  root.className="opening";
+  root.innerHTML=`<button class="pushStart" data-action="enter">SWITCH ON</button>`;
+}
+function enterApp(){
   if(openingInProgress)return;
-  isTryAgain=false;
-  cards=shuffle(allCards.filter(c=>c.no>=selectedStart&&c.no<=selectedEnd));
-  index=0;correct=0;wrong=[];breakShown={30:false,60:false,90:false};
-  if(!withOpening){showQuestion();return}
-
   openingInProgress=true;
   root.className="opening";
   root.innerHTML=`<div><div class="openingTitle">HARUZZY<br>FLASH CARD</div><div class="openingSub">SWITCH ON!</div></div>`;
@@ -299,13 +319,21 @@ function startGame(withOpening=false){
     finished=true;
     clearTimeout(fallbackTimer);
     openingInProgress=false;
-    showQuestion();
+    hasEntered=true;
+    menu();
   }
   audio.addEventListener("ended",finishOpening,{once:true});
   audio.addEventListener("error",finishOpening,{once:true});
   const p=audio.play();
   if(p&&p.catch)p.catch(finishOpening);
   fallbackTimer=setTimeout(finishOpening,6500);
+}
+function startGame(){
+  if(openingInProgress)return;
+  isTryAgain=false;
+  cards=shuffle(allCards.filter(c=>c.no>=selectedStart&&c.no<=selectedEnd));
+  index=0;correct=0;wrong=[];breakShown={30:false,60:false,90:false};
+  showQuestion();
 }
 function startTryAgain(){isTryAgain=true;cards=shuffle([...missedSource]);index=0;correct=0;wrong=[];breakShown={30:true,60:true,90:true};showQuestion()}
 function topbar(){return `<div class="topbar"><div class="vol">${isTryAgain?"TRY AGAIN":volName()}</div><div class="count">${Math.min(index+1,cards.length)} / ${cards.length}</div></div>`}
@@ -438,9 +466,10 @@ function handleAction(e){
     setTimeout(function(){tapLock=false;},350);
   }
 
-  if(a==="mode")changeMode(btn.dataset.mode);
+  if(a==="enter")enterApp();
+  else if(a==="mode")changeMode(btn.dataset.mode);
   else if(a==="vol")selectVol(Number(btn.dataset.s),Number(btn.dataset.e));
-  else if(a==="start")startGame(true);
+  else if(a==="start")startGame();
   else if(a==="answer")showAnswer();
   else if(a==="ok")mark(true);
   else if(a==="ng")mark(false);
@@ -494,7 +523,7 @@ document.addEventListener("click",function(e){
 },true);
 
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&cards.length)showAnswer();});
-menu();
+showSplash();
 loadCloudStats();
 </script>
 </body>
