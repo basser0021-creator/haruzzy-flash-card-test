@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -23,12 +24,14 @@ button{font-family:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-
 .modeBtn.active{background:#ffd21a;color:#061326}
 .sectionGrid{display:grid;grid-template-columns:repeat(2,minmax(130px,1fr));gap:10px;width:min(780px,96vw);max-height:45vh;overflow:auto;margin:12px auto;padding:4px}
 .secBtn{border:1px solid rgba(255,210,26,.35);border-radius:12px;background:rgba(255,255,255,.09);color:#fff;padding:12px 6px;font-size:15px;font-weight:850}
-.secBtn.quickGroupA{background:rgba(255,255,255,.09)}
-.secBtn.quickGroupB{background:rgba(90,135,185,.40);border-color:rgba(170,205,240,.60)}
-.secBtn.selected{background:#ffd21a;color:#061326;border-color:#ffd21a}
-.secBtn.done{background:#FFD21A;color:#061326;border-color:#FFD21A}
-.secBtn.master{background:#FFD21A;color:#061326;border-color:#FFD21A;box-shadow:0 0 16px rgba(255,210,26,.55)}
-.secBtn.grand{background:#FFD21A;color:#061326;border-color:#FFD21A;box-shadow:0 0 22px rgba(255,210,26,.85), inset 0 0 0 2px #fff}
+.secBtn.quickGroupA{background:rgba(255,255,255,.09);border-left:6px solid #94a3b8}
+.secBtn.quickGroupB{background:rgba(90,135,185,.40);border-color:rgba(170,205,240,.60);border-left:6px solid #58a6ff}
+.secBtn.done{background:#f28c28;color:#061326;border-color:#ffb45f}
+.secBtn.master{background:#ed7d1a;color:#061326;border-color:#ffc06f;box-shadow:0 0 16px rgba(242,140,40,.55)}
+.secBtn.grand{background:#df6f12;color:#061326;border-color:#ffd09a;box-shadow:0 0 22px rgba(242,140,40,.75), inset 0 0 0 2px #fff}
+.secBtn.quickGroupA.done,.secBtn.quickGroupA.master,.secBtn.quickGroupA.grand{border-left:6px solid #fff1dc}
+.secBtn.quickGroupB.done,.secBtn.quickGroupB.master,.secBtn.quickGroupB.grand{background:#d96f20;border-left:6px solid #58a6ff}
+.secBtn.selected,.secBtn.selected.done,.secBtn.selected.master,.secBtn.selected.grand{background:#ffd21a;color:#061326;border-color:#fff2a8;box-shadow:0 0 0 3px #fff,0 0 18px rgba(255,210,26,.8)}
 .progressBox{margin:12px auto 0;color:#dbe4ef;font-size:15px;font-weight:900}
 .resetBtn{border:1px solid rgba(255,255,255,.25);background:#1f2937;color:#fff;border-radius:14px;padding:10px 14px;font-size:13px;font-weight:900;margin-top:8px}
 .win{min-height:100vh;width:100vw;display:flex;align-items:center;justify-content:center;text-align:center;padding:16px;background:radial-gradient(circle at center,#1d2b45 0%,#061326 55%,#020814 100%);overflow:hidden;position:relative}
@@ -65,6 +68,10 @@ button{font-family:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-
 .breakNext{width:100%;font-size:34px;margin-top:8px;padding:18px}
 .result{width:min(950px,96vw);max-height:94vh;overflow:auto;text-align:left;background:rgba(255,255,255,.08);border:1px solid rgba(255,210,26,.28);border-radius:24px;padding:22px}
 .resultTitle{text-align:center;color:#ffd21a;font-size:36px;font-weight:1000}
+.opening{min-height:100vh;width:100vw;display:flex;align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle at center,#17345a 0%,#061326 58%,#020814 100%)}
+.openingTitle{font-size:clamp(50px,13vw,112px);font-weight:1000;line-height:.95;color:#ffd21a;text-shadow:0 4px 0 rgba(0,0,0,.3)}
+.openingSub{margin-top:22px;font-size:clamp(20px,5vw,34px);font-weight:1000;letter-spacing:.16em;color:#fff;animation:switchGlow .75s ease-in-out infinite alternate}
+@keyframes switchGlow{from{opacity:.55}to{opacity:1;text-shadow:0 0 18px #58a6ff}}
 .score{text-align:center;font-size:52px;font-weight:1000;margin:10px}
 .miss{padding:9px 0;border-bottom:1px solid rgba(255,255,255,.14)}
 </style>
@@ -81,6 +88,8 @@ let mode="EN_TO_JA", breakShown={30:false,60:false,90:false};
 const root=document.getElementById("root");
 const HARUZZY_API_URL="https://script.google.com/macros/s/AKfycby2TKdHHwAmsnIDe5kdWsfDj9fZ0qGOx3fWE_bex5oEmuOAb05z7cgyIm_8cDW1Ht5VYw/exec";
 const CLOUD_ENABLED=location.hostname==="basser0021-creator.github.io";
+const OPENING_NORMAL_AUDIO="HARUZZY_intro_NORMAL.wav?v=20260721FINAL";
+const OPENING_RARE_AUDIO="HARUZZY_intro_RARE_FEMALE.wav?v=20260721FINAL";
 let cloudStats={};
 let cloudLoaded=false;
 let cloudMessage=CLOUD_ENABLED?"☁️ 同期中...":"☁️ 公開版で3台共有";
@@ -269,7 +278,35 @@ function selectVol(s,e){
   selectedEnd=e;
   menu();
 }
-function startGame(){isTryAgain=false;cards=shuffle(allCards.filter(c=>c.no>=selectedStart&&c.no<=selectedEnd));index=0;correct=0;wrong=[];breakShown={30:false,60:false,90:false};showQuestion()}
+let openingInProgress=false;
+function startGame(withOpening=false){
+  if(openingInProgress)return;
+  isTryAgain=false;
+  cards=shuffle(allCards.filter(c=>c.no>=selectedStart&&c.no<=selectedEnd));
+  index=0;correct=0;wrong=[];breakShown={30:false,60:false,90:false};
+  if(!withOpening){showQuestion();return}
+
+  openingInProgress=true;
+  root.className="opening";
+  root.innerHTML=`<div><div class="openingTitle">HARUZZY<br>FLASH CARD</div><div class="openingSub">SWITCH ON!</div></div>`;
+
+  const isRare=Math.random()<0.05;
+  const audio=new Audio(isRare?OPENING_RARE_AUDIO:OPENING_NORMAL_AUDIO);
+  let finished=false;
+  let fallbackTimer=0;
+  function finishOpening(){
+    if(finished)return;
+    finished=true;
+    clearTimeout(fallbackTimer);
+    openingInProgress=false;
+    showQuestion();
+  }
+  audio.addEventListener("ended",finishOpening,{once:true});
+  audio.addEventListener("error",finishOpening,{once:true});
+  const p=audio.play();
+  if(p&&p.catch)p.catch(finishOpening);
+  fallbackTimer=setTimeout(finishOpening,6500);
+}
 function startTryAgain(){isTryAgain=true;cards=shuffle([...missedSource]);index=0;correct=0;wrong=[];breakShown={30:true,60:true,90:true};showQuestion()}
 function topbar(){return `<div class="topbar"><div class="vol">${isTryAgain?"TRY AGAIN":volName()}</div><div class="count">${Math.min(index+1,cards.length)} / ${cards.length}</div></div>`}
 
@@ -403,7 +440,7 @@ function handleAction(e){
 
   if(a==="mode")changeMode(btn.dataset.mode);
   else if(a==="vol")selectVol(Number(btn.dataset.s),Number(btn.dataset.e));
-  else if(a==="start")startGame();
+  else if(a==="start")startGame(true);
   else if(a==="answer")showAnswer();
   else if(a==="ok")mark(true);
   else if(a==="ng")mark(false);
