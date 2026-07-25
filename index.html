@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -308,7 +309,7 @@ function enterApp(){
   if(openingInProgress)return;
   openingInProgress=true;
   root.className="opening";
-  root.innerHTML=`<div><div class="openingTitle">HARUZZY<br>FLASH CARD</div><div class="openingSub">SWITCH ON!</div></div>`;
+  root.innerHTML=`<div><div class="openingTitle">HARUZZY<br>FLASH CARD</div><div class="openingSub">NOW LOADING...</div></div>`;
 
   const isRare=Math.random()<0.05;
   const audio=new Audio(isRare?OPENING_RARE_AUDIO:OPENING_NORMAL_AUDIO);
