@@ -321,7 +321,7 @@ function enterApp(){
     const audioContext=new AudioContextClass();
     const sourceNode=audioContext.createMediaElementSource(audio);
     const gainNode=audioContext.createGain();
-    gainNode.gain.value=1.7;
+    gainNode.gain.value=isRare?2.0:1.0;
     sourceNode.connect(gainNode);
     gainNode.connect(audioContext.destination);
     if(audioContext.state==="suspended")audioContext.resume();
