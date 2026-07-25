@@ -2,6 +2,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -74,10 +75,10 @@ button{font-family:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-
 .breakNext{width:100%;font-size:34px;margin-top:8px;padding:18px}
 .result{width:min(950px,96vw);max-height:94vh;overflow:auto;text-align:left;background:rgba(255,255,255,.08);border:1px solid rgba(255,210,26,.28);border-radius:24px;padding:22px}
 .resultTitle{text-align:center;color:#ffd21a;font-size:36px;font-weight:1000}
-.opening{min-height:100vh;width:100vw;display:flex;align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle at center,#17345a 0%,#061326 58%,#020814 100%)}
+.opening{min-height:100vh;width:100vw;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle at center,#17345a 0%,#061326 58%,#020814 100%)}
 .openingTitle{font-size:clamp(50px,13vw,112px);font-weight:1000;line-height:.95;color:#ffd21a;text-shadow:0 4px 0 rgba(0,0,0,.3)}
 .openingSub{margin-top:22px;font-size:clamp(20px,5vw,34px);font-weight:1000;letter-spacing:.16em;color:#fff;animation:switchGlow .75s ease-in-out infinite alternate}
-.pushStart{border:0;border-radius:22px;background:#ffd21a;color:#061326;padding:20px 46px;font-size:clamp(30px,8vw,58px);font-weight:1000;letter-spacing:.08em;box-shadow:0 12px 30px rgba(0,0,0,.45);animation:switchRise .9s cubic-bezier(.2,.8,.2,1) both,pushBlink .8s steps(2,end) .9s infinite}
+.pushStart{border:0;border-radius:22px;background:#ffd21a;color:#061326;padding:20px 46px;font-size:clamp(30px,8vw,58px);font-weight:1000;letter-spacing:.08em;box-shadow:0 12px 30px rgba(0,0,0,.45);transform:translateY(-25px);animation:switchRise .9s cubic-bezier(.2,.8,.2,1) both,pushBlink .8s steps(2,end) .9s infinite}
 @keyframes switchGlow{from{opacity:.55}to{opacity:1;text-shadow:0 0 18px #58a6ff}}
 @keyframes pushBlink{50%{opacity:.58}}
 @keyframes switchRise{from{opacity:0;transform:translateY(70px) scale(.88)}to{opacity:1;transform:translateY(0) scale(1)}}
@@ -309,7 +310,7 @@ function enterApp(){
   if(openingInProgress)return;
   openingInProgress=true;
   root.className="opening";
-  root.innerHTML=`<div><div class="openingTitle">HARUZZY<br>FLASH CARD</div><div class="openingSub">NOW LOADING...</div></div>`;
+  root.innerHTML=`<div style="transform:translateY(-30px)"><div class="openingTitle">HARUZZY<br>FLASH CARD</div><div class="openingSub">NOW LOADING...</div></div>`;
 
   const isRare=Math.random()<0.10;
   const audio=new Audio(isRare?OPENING_RARE_AUDIO:OPENING_NORMAL_AUDIO);
