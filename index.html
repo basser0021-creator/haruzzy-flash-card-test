@@ -311,7 +311,7 @@ function enterApp(){
   root.className="opening";
   root.innerHTML=`<div><div class="openingTitle">HARUZZY<br>FLASH CARD</div><div class="openingSub">NOW LOADING...</div></div>`;
 
-  const isRare=Math.random()<0.05;
+  const isRare=Math.random()<0.10;
   const audio=new Audio(isRare?OPENING_RARE_AUDIO:OPENING_NORMAL_AUDIO);
   audio.volume=1;
   try{
