@@ -313,6 +313,19 @@ function enterApp(){
 
   const isRare=Math.random()<0.05;
   const audio=new Audio(isRare?OPENING_RARE_AUDIO:OPENING_NORMAL_AUDIO);
+  audio.volume=1;
+  try{
+    const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+    const audioContext=new AudioContextClass();
+    const sourceNode=audioContext.createMediaElementSource(audio);
+    const gainNode=audioContext.createGain();
+    gainNode.gain.value=1.7;
+    sourceNode.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    if(audioContext.state==="suspended")audioContext.resume();
+  }catch(e){
+    audio.volume=1;
+  }
   let finished=false;
   let fallbackTimer=0;
   function finishOpening(){
