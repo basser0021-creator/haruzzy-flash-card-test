@@ -318,7 +318,7 @@ function enterApp(){
 
   const isRare=Math.random()<0.10;
   const audio=new Audio(isRare?OPENING_RARE_AUDIO:OPENING_NORMAL_AUDIO);
-  audio.volume=0.15;
+  audio.volume=0.05;
   try{
     const AudioContextClass=window.AudioContext||window.webkitAudioContext;
     const audioContext=new AudioContextClass();
@@ -329,7 +329,7 @@ function enterApp(){
     gainNode.connect(audioContext.destination);
     if(audioContext.state==="suspended")audioContext.resume();
   }catch(e){
-    audio.volume=0.15;
+    audio.volume=0.05;
   }
   let finished=false;
   let fallbackTimer=0;
