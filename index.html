@@ -21,7 +21,8 @@
 html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none;background:#061326;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Arial,sans-serif}
 button{font-family:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:rgba(255,210,26,.25)}
 .app{width:100%;height:100vh;height:100dvh;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center;padding:18px}
-.title{font-size:clamp(42px,11.5vw,100px);font-weight:1000;line-height:.94;letter-spacing:.03em;color:#ffd21a;text-shadow:0 4px 0 rgba(0,0,0,.25)}
+.app.menuApp{align-items:flex-start;padding-top:max(10px,env(safe-area-inset-top));padding-bottom:max(10px,env(safe-area-inset-bottom))}
+.title{font-size:clamp(48px,13vw,116px);font-weight:1000;line-height:.94;letter-spacing:.03em;color:#ffd21a;text-shadow:0 4px 0 rgba(0,0,0,.25)}
 .subtitle{font-size:clamp(14px,2.8vw,20px);font-weight:700;margin:8px 0 12px;color:#dbe4ef}
 .small{font-size:13px;color:#cbd5e1;margin:8px}
 .modeTabs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:16px auto}
@@ -80,8 +81,7 @@ button{font-family:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-
 .resultTitle{text-align:center;color:#ffd21a;font-size:36px;font-weight:1000}
 .opening{height:100vh;height:100dvh;width:100%;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:radial-gradient(circle at center,#17345a 0%,#061326 58%,#020814 100%)}
 .openingTitle{font-size:clamp(50px,13vw,112px);font-weight:1000;line-height:.95;color:#ffd21a;text-shadow:0 4px 0 rgba(0,0,0,.3)}
-.openingCourse{margin-top:8px;font-size:clamp(11px,2.5vw,15px);font-weight:700;letter-spacing:.03em;color:#dbe4ef}
-.openingSub{margin-top:18px;font-size:clamp(20px,5vw,34px);font-weight:1000;letter-spacing:.16em;color:#fff;animation:switchGlow .75s ease-in-out infinite alternate}
+.openingSub{margin-top:22px;font-size:clamp(20px,5vw,34px);font-weight:1000;letter-spacing:.16em;color:#fff;animation:switchGlow .75s ease-in-out infinite alternate}
 .pushStart{border:0;border-radius:22px;background:#ffd21a;color:#061326;padding:20px 46px;font-size:clamp(30px,8vw,58px);font-weight:1000;letter-spacing:.08em;box-shadow:0 12px 30px rgba(0,0,0,.45);transform:translateY(-25px);animation:switchRise .9s cubic-bezier(.2,.8,.2,1) both,pushBlink .8s steps(2,end) .9s infinite}
 @keyframes switchGlow{from{opacity:.55}to{opacity:1;text-shadow:0 0 18px #58a6ff}}
 @keyframes pushBlink{50%{opacity:.58}}
@@ -89,7 +89,7 @@ button{font-family:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-
 .score{text-align:center;font-size:52px;font-weight:1000;margin:10px}
 .miss{padding:9px 0;border-bottom:1px solid rgba(255,255,255,.14)}
 </style>
-<!-- HARUZZY_VER_5_3_SCROLL_POSITION_FIX -->
+<!-- HARUZZY_VER_5_4_MENU_TOP_BGM40_FIX_20260726 -->
 </head>
 <body>
 <div id="root" class="app">読み込み中...</div>
@@ -267,7 +267,7 @@ function menu(){
       buttons+=`<button class="${cls}" data-action="vol" data-s="${s}" data-e="${e}">vol.${pad(s)}-${pad(e)}${statusLabel(st)}</button>`;
     }
   }
-  root.className="app";
+  root.className="app menuApp";
   root.innerHTML=`<div>
     <div class="title">HARUZZY<br>FLASH CARD</div>
     <div class="subtitle">EIKEN Grade 2 – 1,700 Words</div>
@@ -314,7 +314,7 @@ function enterApp(){
   if(openingInProgress)return;
   openingInProgress=true;
   root.className="opening";
-  root.innerHTML=`<div style="transform:translateY(-30px)"><div class="openingTitle">HARUZZY<br>FLASH CARD</div><div class="openingCourse">EIKEN Grade 2 – 1,700 Words</div><div class="openingSub">NOW LOADING...</div></div>`;
+  root.innerHTML=`<div style="transform:translateY(-30px)"><div class="openingTitle">HARUZZY<br>FLASH CARD</div><div class="openingSub">NOW LOADING...</div></div>`;
 
   const isRare=Math.random()<0.10;
   const audio=new Audio(isRare?OPENING_RARE_AUDIO:OPENING_NORMAL_AUDIO);
@@ -329,7 +329,7 @@ function enterApp(){
     gainNode.connect(audioContext.destination);
     if(audioContext.state==="suspended")audioContext.resume();
   }catch(e){
-    audio.volume=1;
+    audio.volume=0.40;
   }
   let finished=false;
   let fallbackTimer=0;
