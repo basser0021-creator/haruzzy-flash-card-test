@@ -6,6 +6,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -89,7 +90,7 @@ button{font-family:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-
 .score{text-align:center;font-size:52px;font-weight:1000;margin:10px}
 .miss{padding:9px 0;border-bottom:1px solid rgba(255,255,255,.14)}
 </style>
-<!-- HARUZZY_VER_5_4_MENU_TOP_BGM40_FIX_20260726 -->
+<!-- HARUZZY_VER_5_4_MENU_TOP_BGM03_FIX_20260727 -->
 </head>
 <body>
 <div id="root" class="app">読み込み中...</div>
@@ -318,19 +319,7 @@ function enterApp(){
 
   const isRare=Math.random()<0.10;
   const audio=new Audio(isRare?OPENING_RARE_AUDIO:OPENING_NORMAL_AUDIO);
-  audio.volume=0.05;
-  try{
-    const AudioContextClass=window.AudioContext||window.webkitAudioContext;
-    const audioContext=new AudioContextClass();
-    const sourceNode=audioContext.createMediaElementSource(audio);
-    const gainNode=audioContext.createGain();
-    gainNode.gain.value=isRare?2.0:1.0;
-    sourceNode.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    if(audioContext.state==="suspended")audioContext.resume();
-  }catch(e){
-    audio.volume=0.05;
-  }
+  audio.volume=0.03;
   let finished=false;
   let fallbackTimer=0;
   function finishOpening(){
