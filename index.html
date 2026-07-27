@@ -320,7 +320,7 @@ function enterApp(){
 
   const isRare=Math.random()<0.10;
   const audio=new Audio(isRare?OPENING_RARE_AUDIO:OPENING_NORMAL_AUDIO);
-  audio.volume=0.02;
+  audio.volume = 0.015;
   let finished=false;
   let fallbackTimer=0;
   function finishOpening(){
