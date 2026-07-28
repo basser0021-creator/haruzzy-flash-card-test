@@ -8,6 +8,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -237,7 +238,7 @@ function progressSummary(){
   return `⚡ QUICK　${q.done}/${q.total} Vol　${q.pct}%　⭐${q.master}　👑${q.grand}<br>📚 STANDARD　${st.done}/${st.total} Vol　${st.pct}%　⭐${st.master}　👑${st.grand}`;
 }
 function speak(text){if(!("speechSynthesis" in window))return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=.82;speechSynthesis.speak(u)}
-function tone(f,type,dur,vol,delay=0){try{let c=window.__ctx||new(window.AudioContext||window.webkitAudioContext)();window.__ctx=c;let o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.value=f;o.connect(g);g.connect(c.destination);let t=c.currentTime+delay;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.start(t);o.stop(t+dur+.03)}catch(e){}}
+function tone(f,type,dur,vol,delay=0){try{let c=window.__ctx||new(window.AudioContext||window.webkitAudioContext)();window.__ctx=c;if(c.state==="suspended")c.resume();let o=c.createOscillator(),g=c.createGain();o.type=type;o.frequency.value=f;o.connect(g);g.connect(c.destination);let t=c.currentTime+delay;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.start(t);o.stop(t+dur+.03)}catch(e){}}
 function playClick(){tone(920,"square",.055,.13);tone(1220,"triangle",.06,.08,.045)}
 function playCorrect(){tone(880,"triangle",.11,.16);tone(1320,"triangle",.14,.15,.09)}
 function playWrong(){tone(300,"sawtooth",.12,.12);tone(180,"sawtooth",.14,.11,.10)}
