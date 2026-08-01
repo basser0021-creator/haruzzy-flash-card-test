@@ -9,6 +9,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -92,7 +93,7 @@ button{font-family:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-
 .score{text-align:center;font-size:52px;font-weight:1000;margin:10px}
 .miss{padding:9px 0;border-bottom:1px solid rgba(255,255,255,.14)}
 </style>
-<!-- HARUZZY_VER_5_4_MENU_TOP_BGM03_FIX_20260727 -->
+<!-- HARUZZY_VER_5_5_BREAK5SEC_GOAL_SOUND_20260801 -->
 </head>
 <body>
 <div id="root" class="app">読み込み中...</div>
@@ -243,6 +244,7 @@ function playClick(){tone(920,"square",.055,.13);tone(1220,"triangle",.06,.08,.0
 function playCorrect(){tone(880,"triangle",.11,.16);tone(1320,"triangle",.14,.15,.09)}
 function playWrong(){tone(300,"sawtooth",.12,.12);tone(180,"sawtooth",.14,.11,.10)}
 function playBreak(long){tone(660,"sine",.18,.13);tone(990,"sine",.20,.11,.15);if(long)tone(1320,"sine",.26,.10,.34)}
+function playGoal(){tone(660,"triangle",.12,.11);tone(880,"triangle",.14,.12,.10);tone(1100,"triangle",.18,.13,.22);tone(1320,"sine",.28,.11,.38)}
 
 function menu(){
   const step=selectedMode==="standard"?100:20;
@@ -419,11 +421,13 @@ function showBreak(n){
     <div class="breakMsg">${msg}</div>
     <div class="breakSub">${sub}</div>
     <div style="height:110px;display:flex;align-items:center;justify-content:center">${img}</div>
-    <button class="breakNext" data-action="next">NEXT</button>
+    <button id="breakNextBtn" class="breakNext" data-action="next" style="visibility:hidden">NEXT</button>
   </div>`;
+  setTimeout(()=>{const b=document.getElementById("breakNextBtn");if(b)b.style.visibility="visible"},5000);
 }
 function showWin(){
   markComplete();
+  playGoal();
   root.className="win";
   root.innerHTML=`<div class="confetti"></div><div class="winBox">
     <div class="perfect">★★★ PERFECT SCORE! ★★★</div>
